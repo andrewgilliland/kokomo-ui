@@ -1,10 +1,10 @@
-# Workflow name
-name: Build and Publish Storybook to GitHub Pages
+name: Deploy Storybook to GitHub Pages
 
 on:
   push:
     branches:
-      - "main"
+      - main
+      - dev
 
 permissions:
   contents: read
@@ -12,24 +12,41 @@ permissions:
   id-token: write
 
 jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Storybook
+        run: |
+          if [ "${{ github.ref_name }}" = "main" ]; then
+            npm run build-storybook -- --output-dir ./storybook-static
+          else
+            npm run build-storybook -- --output-dir ./storybook-static/dev
+          fi
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./storybook-static
+
   deploy:
     environment:
       name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    # Job steps
+    needs: build-and-deploy
     steps:
-      # Manual Checkout
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      # Set up Node
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-      #👇 Add Storybook build and deploy to GitHub Pages as a step in the workflow
-      - uses: bitovi/github-actions-storybook-to-github-pages@v1.0.3
-        with:
-          install_command: yarn install # default: npm ci
-          build_command: yarn build-storybook # default: npm run build-storybook
-          path: storybook-static # default: dist/storybook
-          checkout: false # default: true
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
