@@ -1,52 +1,37 @@
-name: Deploy Storybook to GitHub Pages
+# Workflow name
+name: Build and Publish Storybook to GitHub Pages
 
 on:
+  # Event for the workflow to run on
   push:
     branches:
-      - main
-      - dev
+      - "main" # Replace with the branch you want to deploy from
 
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
+# List of jobs
 jobs:
   deploy:
+    environment:
+      name: github-pages
     runs-on: ubuntu-latest
+    # Job steps
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      # Manual Checkout
+      - uses: actions/checkout@v4
         with:
-          node-version: 20
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build Storybook
-        run: |
-          if [ "${{ github.ref_name }}" = "main" ]; then
-            npm run build-storybook -- --output-dir ./storybook-static
-          else
-            npm run build-storybook -- --output-dir ./storybook-static
-          fi
-
-      - name: Deploy to GitHub Pages (main branch)
-        if: github.ref_name == 'main'
-        uses: peaceiris/actions-gh-pages@v4
+          fetch-depth: 0
+      # Set up Node
+      - uses: actions/setup-node@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./storybook-static
-          keep_files: true
-
-      - name: Deploy to GitHub Pages (dev branch)
-        if: github.ref_name == 'dev'
-        uses: peaceiris/actions-gh-pages@v4
+          node-version: "20"
+      #👇 Add Storybook build and deploy to GitHub Pages as a step in the workflow
+      - uses: bitovi/github-actions-storybook-to-github-pages@v1.0.3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./storybook-static
-          destination_dir: dev
-          keep_files: true
+          install_command: yarn install # default: npm ci
+          build_command: yarn build-storybook # default: npm run build-storybook
+          path: storybook-static # default: dist/storybook
+          checkout: false # default: true
