@@ -9,10 +9,11 @@ on:
 jobs:
   mirror:
     runs-on: ubuntu-latest
+    environment: production
     steps:
       - uses: actions/checkout@v4
 
       - name: Push to mirror
         run: |
-          git remote add mirror https://${{ secrets.MIRROR_TOKEN }}@github.com/andrewgilliland/kokomo-ui-dev.git
+          git remote add mirror https://x-access-token:${{ secrets.MIRROR_TOKEN }}@github.com/andrewgilliland/kokomo-ui-dev.git
           git push --mirror mirror
