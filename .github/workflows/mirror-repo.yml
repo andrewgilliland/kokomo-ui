@@ -14,5 +14,5 @@ jobs:
 
       - name: Push to mirror
         run: |
-          git remote add mirror https://x-access-token:${{ secrets.MIRROR_TOKEN }}@github.com/andrewgilliland/kokomo-ui-dev.git
+          git remote add mirror https://<${{ secrets.MIRROR_TOKEN }}>@github.com/andrewgilliland/kokomo-ui-dev.git
           git push --mirror mirror
