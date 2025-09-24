@@ -46,7 +46,7 @@ jobs:
           registry-url: "https://npm.pkg.github.com/"
           scope: "@andrewgilliland"
       - name: Configure npm for GitHub Packages
-        run: echo "registry=https://npm.pkg.github.com/@andrewgilliland" > .npmrc && npm ci
+        run: echo "registry=https://npm.pkg.github.com/@andrewgilliland" > .npmrc
       - name: Release package
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
